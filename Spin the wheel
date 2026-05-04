@@ -1,0 +1,148 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Travel Theme Spinning Wheel</title>
+  <style>
+    body {
+      text-align: center;
+      font-family: Arial, sans-serif;
+      background-color: #fefae0;
+      margin-top: 30px;
+    }
+
+    canvas {
+      border: 5px solid #ff9800;
+      border-radius: 50%;
+      background-color: #ffe0b2;
+    }
+
+    #spin {
+      margin-top: 20px;
+      padding: 12px 24px;
+      font-size: 18px;
+      background-color: #ff9800;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    #winner {
+      margin-top: 30px;
+      font-size: 28px;
+      font-weight: bold;
+      color: #2c3e50;
+      animation: none;
+    }
+
+    .glow {
+      color: #ff5722;
+      text-shadow: 0 0 10px #ff5722, 0 0 20px #ff9800, 0 0 30px #ff5722;
+      animation: glow 1s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+      from {
+        text-shadow: 0 0 10px #ff9800, 0 0 20px #ff9800;
+      }
+      to {
+        text-shadow: 0 0 20px #ff5722, 0 0 40px #ff5722;
+      }
+    }
+
+    .icons {
+      margin-top: 30px;
+    }
+
+    .icons img {
+      width: 80px;
+      margin: 0 10px;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+  <h1> Who's Next?</h1>
+  <canvas id="wheel" width="500" height="500"></canvas><br>
+  <button id="spin">Spin the Wheel</button>
+  <div id="winner"></div>
+
+  <div class="icons">
+    <img src="https://img.icons8.com/emoji/96/ferry-emoji.png" alt="Ship">
+    <img src="https://img.icons8.com/emoji/96/bus-emoji.png" alt="Bus">
+    <img src="https://img.icons8.com/emoji/96/locomotive-emoji.png" alt="Train">
+  </div>
+
+  <script>
+    const names = [
+      "Elisa", "Chris", "Emily", "Ice",
+      "Irakli Svanidze", "Lasha Liluashvili", "Lasha Vardidze",
+      "Liam", "Michael", "Natalia", "Apple","Abe", "Bobby", "Mook", 
+      "Oleg", "Pavel",
+      "Phakapat", "Pimlapat", "Rik", "Shella Marie",
+      "Singha", "Smile", "Yuli", "Irakli Kobalia", "Jay", "Prab", "Sergi", "Trung", "Som", "Atom"
+    ];
+
+    const canvas = document.getElementById("wheel");
+    const ctx = canvas.getContext("2d");
+    const radius = canvas.width / 2;
+    const arcSize = 2 * Math.PI / names.length;
+    let angleOffset = 0;
+
+    function drawWheel() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < names.length; i++) {
+        const startAngle = angleOffset + i * arcSize;
+        const endAngle = startAngle + arcSize;
+
+        ctx.beginPath();
+        ctx.fillStyle = "#ff9800";
+        ctx.moveTo(radius, radius);
+        ctx.arc(radius, radius, radius, startAngle, endAngle);
+        ctx.fill();
+
+        ctx.save();
+        ctx.translate(radius, radius);
+        ctx.rotate(startAngle + arcSize / 2);
+        ctx.textAlign = "right";
+        ctx.fillStyle = "#000000";
+        ctx.font = "bold 14px sans-serif";
+        ctx.fillText(names[i], radius - 10, 5);
+        ctx.restore();
+      }
+    }
+
+    drawWheel();
+
+    document.getElementById("spin").addEventListener("click", () => {
+      document.getElementById("winner").classList.remove("glow");
+      document.getElementById("winner").innerText = "";
+      
+      let spins = Math.random() * 3000 + 3000;
+      const start = performance.now();
+
+      function animate(time) {
+        const elapsed = time - start;
+        const progress = elapsed / spins;
+        angleOffset += 0.3 * (1 - progress);
+        drawWheel();
+
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          const normalizedAngle = angleOffset % (2 * Math.PI);
+          const selectedIndex = names.length - Math.floor(normalizedAngle / arcSize) - 1;
+          const winner = names[(selectedIndex + names.length) % names.length];
+          const winnerDiv = document.getElementById("winner");
+          winnerDiv.innerText = ` Winner: ${winner}!`;
+          winnerDiv.classList.add("glow");
+        }
+      }
+
+      requestAnimationFrame(animate);
+    });
+  </script>
+</body>
+</html>
